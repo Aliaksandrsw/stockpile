@@ -14,7 +14,7 @@ from app.schemas import CreateOrder, CreateOrderItem, OrderStatus
 router = APIRouter(prefix='/orders',tags=['orders'])
 
 # Эндпоинт для создания заказа
-@router.post("/create_order", response_model=CreateOrder)
+@router.post("/orders", response_model=CreateOrder)
 async def create_order(order_data: CreateOrder, db: AsyncSession = Depends(get_db)):
     # Создание заказа с использованием значения перечисления
     db_order = Order(status=order_data.status.value)
@@ -53,7 +53,7 @@ async def create_order(order_data: CreateOrder, db: AsyncSession = Depends(get_d
     )
 
 # Эндпоинт для получения всех заказов
-@router.get("/all_orders", response_model=list[CreateOrder])
+@router.get("/orders", response_model=list[CreateOrder])
 async def list_orders(db: AsyncSession = Depends(get_db)):
     # Выполняем жадную загрузку связанных объектов
     result = await db.execute(select(Order).options(selectinload(Order.order_items)))
@@ -75,7 +75,7 @@ async def list_orders(db: AsyncSession = Depends(get_db)):
     return response
 
 # Эндпоинт для получения заказа по ID
-@router.get("/get_order/{id}", response_model=CreateOrder)
+@router.get("/orders/{id}", response_model=CreateOrder)
 async def get_order(id: int, db: AsyncSession = Depends(get_db)):
     # Выполняем запрос заказа
     result = await db.execute(select(Order).filter(Order.id == id))
@@ -100,7 +100,7 @@ async def get_order(id: int, db: AsyncSession = Depends(get_db)):
     )
 
 # Эндпоинт для обновления статуса заказа
-@router.patch("/update_status_order/{id}", response_model=CreateOrder)
+@router.patch("/orders/{id}/status", response_model=CreateOrder)
 async def update_order_status(id: int, status: str, db: AsyncSession = Depends(get_db)):
     # Получаем заказ по ID
     result = await db.execute(select(Order).filter(Order.id == id))

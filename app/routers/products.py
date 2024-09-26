@@ -12,11 +12,11 @@ from app.models.Product import Product  # Модель SQLAlchemy
 from app.schemas import CreateProduct
 
 # Создаем маршрутизатор для работы с товарами
-router = APIRouter(prefix='/products', tags=['products'])
+router = APIRouter(tags=['products'])
 
 
 # Эндпоинт для создания товара
-@router.post("/create_product", response_model=CreateProduct)
+@router.post("/products", response_model=CreateProduct)
 async def create_product(product: CreateProduct, db: AsyncSession = Depends(get_db)):
     db_product = Product(**product.dict())  # Преобразуем данные из схемы в модель
     db.add(db_product)  # Добавляем товар в базу данных
@@ -26,14 +26,14 @@ async def create_product(product: CreateProduct, db: AsyncSession = Depends(get_
 
 
 # Эндпоинт для получения списка всех товаров
-@router.get("/all_products", response_model=list[CreateProduct])
+@router.get("/products", response_model=list[CreateProduct])
 async def list_products(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Product))  # Получаем все товары из базы данных
     return result.scalars().all()  # Возвращаем список товаров
 
 
 # Эндпоинт для получения товара по ID
-@router.get("/get_product/{id}", response_model=CreateProduct)
+@router.get("/products/{id}", response_model=CreateProduct)
 async def get_product(id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Product).filter(Product.id == id))  # Ищем товар по ID
     product = result.scalar_one_or_none()  # Получаем один товар или None
@@ -42,7 +42,7 @@ async def get_product(id: int, db: AsyncSession = Depends(get_db)):
     return product  # Возвращаем товар
 
 
-@router.put("/update_product/{id}", response_model=CreateProduct)
+@router.put("/products/{id}", response_model=CreateProduct)
 async def update_product(id: int, product_update: CreateProduct, db: AsyncSession = Depends(get_db)):
     # Проверяем, есть ли товар в заказах
     order_item_exists = await db.execute(
@@ -69,7 +69,7 @@ async def update_product(id: int, product_update: CreateProduct, db: AsyncSessio
 
 
 # Эндпоинт для удаления товара
-@router.delete("/delete_product/{id}")
+@router.delete("/products/{id}")
 async def delete_product(id: int, db: AsyncSession = Depends(get_db)):
     # Получаем все связанные OrderItem для продукта
     related_orders = await db.execute(
